@@ -1,9 +1,9 @@
 [package]
-name = "mypkg"
-version = "0.1.0"
-description = "One line saying what the package does"
+name = "unicode"
+version = "1.0.0"
+description = "Unicode normalization, grapheme and word segmentation, display width and case folding"
 license = "Apache-2.0"
-repository = "https://github.com/OWNER/pepper-mypkg"
+repository = "https://github.com/pep-lang/pepper-unicode"
 # The oldest Pepper toolchain that builds the package: CI also tests with
 # it, and `pepper package` skips a version whose minimum is newer than the
 # user's toolchain. Toolchains before 0.11 reject the key, so set it only

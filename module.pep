@@ -1,20 +1,45 @@
-## One sentence saying what the module does, then what a caller needs to
-## know before using it.
+## The Unicode algorithms the runtime leaves out, with Unicode 16.0 data:
+## normalization, grapheme and word segmentation, display width, and case
+## folding.
 ##
-## Bring it in with `import mypkg`.
+## Bring it in with `import unicode`.
 ##
-## - `greet`: what each part of the API is for
+## - `normalize`, `is_normalized`, `Form`: NFC, NFD, NFKC and NFKD (UAX #15)
+## - `graphemes`, `Graphemes`: extended grapheme clusters (UAX #29)
+## - `words`, `Words`: the pieces between word boundaries (UAX #29)
+## - `display_width`, `code_point_width`: terminal columns, as `wcwidth`
+## - `case_fold`, `equals_ignoring_case`: full case folding and caseless matching
+## - `UNICODE_VERSION`: the version of the data
 ##
 ## @example
-##     import mypkg;
+##     import unicode;
 ##
 ##     main(): int {
-##         print(mypkg.greet("Ada"));   # Hello, Ada!
+##         var word = "cafe\u{301}";
+##         assert(unicode.normalize(word) == "caf\u{E9}", "NFC composes the accent");
+##         assert(unicode.graphemes(word).to_array().count == 4, "four characters");
+##         assert(unicode.display_width("日本") == 4, "two wide characters");
+##         assert(unicode.equals_ignoring_case("Café", "CAFE\u{301}"), "a caseless match");
 ##         return 0;
 ##     }
 
 # This file only gathers the module's public API from its other files.
 
-import "greet";
+import "case";
+import "normalize";
+import "segment";
+import "tables";
+import "width";
 
-export greet;
+export Form;
+export normalize;
+export is_normalized;
+export Graphemes;
+export graphemes;
+export Words;
+export words;
+export code_point_width;
+export display_width;
+export case_fold;
+export equals_ignoring_case;
+export UNICODE_VERSION;
