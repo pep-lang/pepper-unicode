@@ -49,7 +49,8 @@ const _W_PICTOGRAPHIC: uint = 32;
 ## An `Iterator<String>` over the extended grapheme clusters of a String,
 ## each one a new String: what a reader sees as one character, such as a
 ## letter with its accents, a Hangul syllable written in jamo, a flag, or an
-## emoji sequence joined by U+200D. Returned by `graphemes`.
+## emoji sequence joined by U+200D. Make it with `graphemes`: a
+## default-constructed `Graphemes()` has no text to walk.
 ##
 ## @example
 ##     import unicode;
@@ -226,7 +227,8 @@ _grapheme_breaks(previous: uint, next: uint, conjunct: uint, emoji: uint, region
 ## boundaries, each one a new String. Every piece is yielded: words and
 ## numbers, but also each run of spaces and each punctuation mark, so the
 ## pieces joined give the text back. Keep the ones that hold a letter or a
-## digit to get only the words. Returned by `words`.
+## digit to get only the words. Make it with `words`: a default-constructed
+## `Words()` has no text to walk.
 ##
 ## It reads the whole text's word properties when it is made.
 ##
@@ -292,6 +294,8 @@ extend Words with Iterator<String>;
 ##     # "3.14", " ", "is", " ", "π", "."
 ##     assert(pieces.count == 6 && pieces[0] == "3.14", "a number with its point");
 export words(value: String): Words {
+    # shortcut: 12 bytes per code point for the whole text, so the rules can
+    # look both ways; move to a sliding window if huge texts need splitting.
     var it = Words();
     it._text = value;
     it._offsets = Array<ulong>();

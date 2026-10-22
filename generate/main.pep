@@ -137,7 +137,8 @@ flags(text: String, name: String): bool[] {
 # The position of `name` in the space-separated `names`.
 index_of(names: String, name: String): uint {
     var all = names.split(" ");
-    for (var i in 0..all.count) {
+    # The type is written out for toolchains before pep-lang/pepper#60 (#52).
+    for (var i: ulong in 0..all.count) {
         if (all[i] == name) {
             return i as uint;
         }
@@ -182,7 +183,7 @@ struct Table {
             }
             out.append(digits[i]);
         }
-        emit(out, "\", " + to_string(width) + ", 16, " + to_string(count) + ");\n\n");
+        emit(out, "\", " + to_string(width) + ", " + to_string(count) + ");\n\n");
     }
 }
 

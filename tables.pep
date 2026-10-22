@@ -104,7 +104,7 @@ const _NORMALIZATION = _Table("#########%C$+###%D#####%K$+###%L#####%M$+###%N###
 #A]/####A]0$+##A]3####A]4$+##A]6####A]7$+##A]8####A]:$+##A];####A]<$+##A]=####A]>$+##A]?####A]@$+##A]A####A]B$+#
 #A]C####A]D$+##A]F####A]G$+##A]H####A]J$+##A]N####A]O$+##A]V####A]W$+##A][####A]]$+##A]a####A]b$+##A]c####A^#$+#
 #A^-####A^.$+##A^?####A^D$+##A^G####A^H$+##A^M####A^N$+##A^`####B'#$+##B'.####B'3$+##B'R####B'S$+##B(3####B(M$+#
-#B(P####B)3$+##B)4####B+#$+##B+&####B+3$+##B+`####B,#$+##B,,####B,3$+##B,5####BRS$+##BR^####RC#$?##RKA###", 7, 16, 1519);
+#B(P####B)3$+##B)4####B+#$+##B+&####B+3$+##B+`####B,#$+##B,,####B,3$+##B,5####BRS$+##BR^####RC#$?##RKA###", 7, 1519);
 
 const _NORMALIZATION_INDEX = _Table("#######2#B#L#W#[$%$*$*$,$1$K%&%2
 %?%J%T%V&$&$&$&D&L&S'''('9'F'O'O
@@ -233,7 +233,7 @@ const _NORMALIZATION_INDEX = _Table("#######2#B#L#W#[$%$*$*$,$1$K%&%2
 :;:;:;:;:<:@:C:E:F:J:M:M:M:M:M:M
 :M:M:M:M:M:M:M:M:M:M:M:M:M:M:M:M
 :M:M:M:M:M:M:M:M:M:M:M:M:M:M:M:M
-:O:O:O:O:O:O:O:O:O:O:O:O:O:O:O:O", 2, 16, 2048);
+:O:O:O:O:O:O:O:O:O:O:O:O:O:O:O:O", 2, 2048);
 
 # Full canonical decompositions, by code point (Hangul excluded).
 const _CANONICAL = _Table("#&###;%#&$##=%#&%##?%#&&##A%#&'##C%#&(##E%#&*##G%#&+##I%#&,##K%#&-##M%#&.##O%#&/##Q%#&0##S%#&1##U%#&2##W%#&4##Y%
@@ -366,7 +366,7 @@ RJ@$KT$RJA$KU$RJB$.]$RJC$KV$RJD$KW$RJE$KX$RJF$KY$RJG$KZ$RJH$K[$RJI$K]$RJJ$K^$RJK
 RJP$L#$RJQ$L$$RJR$L%$RJS$L&$RJT$L'$RJU$L($RJV$L)$RJW$L*$RJX$L+$RJY$L,$RJZ$L-$RJ[$L.$RJ]$L/$RJ^$L0$RJ_$L1$RJ`$L2$
 RJa$L3$RJb$.c$RJc$.c$RK#$L4$RK$$L5$RK%$L6$RK&$L7$RK'$L8$RK($L9$RK)$L:$RK*$L;$RK+$L<$RK,$L=$RK-$/#$RK.$L>$RK/$L?$
 RK0$L@$RK1$LA$RK2$LB$RK3$LC$RK4$LD$RK5$LE$RK6$LF$RK7$LG$RK8#Q[$RK9$LH$RK:#Q`$RK;$LI$RK<$LJ$RK=$LK$RK>$LL$RK?#R$$
-RK@$LM$", 7, 16, 2081);
+RK@$LM$", 7, 2081);
 
 # Full compatibility decompositions, by code point, where they differ
 # from the canonical one.
@@ -610,7 +610,7 @@ B(M$D5%B(N$D7%B(O$D9%B)3$D;%B+#$D=%B+$$D?%B+%#]($B+3#OS$B+4$DA$B+5$DB$B+6#SC%B+7
 B+<$DF$B+=$DG$B+>$+K$B+?$DH$B+@$DI$B+A$DJ$B+B$DK$B+C$DL$B+D$DM$B+E#P7$B+F$DN$B+G$DO$B+H$DP$B+I$DQ$B+J$DR$B+K$DS$
 B+L#NT$B+M#UG$B+N$DT$B+O#ZQ$B+P#UJ$B+Q#ZR$B+R$DU$B+S#Q/$B+T$DV$B+U$DW$B+V$DX$B+W$DY$B+X$DZ$B+Y#Z@$B+Z#O^$B+[$D[$
 B+]$D]$B+^$D^$B+_$D_$B,#$D`&B,$$Dc&B,%$E%&B,&$E(&B,'$E+&B,($E.&B,)$E1&B,*$E4&B,+$E7&B,3$E:$B,4$E;$BRS#Fc$BRT##0$
-BRU##)$BRV##*$BRW#G#$BRX#G$$BRY#G%$BRZ#G&$BR[#G'$BR]#G($", 7, 16, 3848);
+BRU##)$BRV##*$BRW#G#$BRX#G$$BRY#G%$BRZ#G&$BR[#G'$BR]#G($", 7, 3848);
 
 # Canonical compositions: first, second, composite, sorted by pair.
 const _COMPOSITION = _Table("##`#/[%,Q##a#/[%,C##b#/[%,R#$$#/##&##$$#/$#&$#$$#/%#&%#$$#/&#&&#$$#/'#'##$$#/)#'%#$$#/*#+I#$$#/+#&'#$$#/,$^E#$$#/-#&(#$$#//#*0#$$#/2#+##$$#/4#+%
@@ -673,7 +673,7 @@ $aR#0($bR$aS#0($bU$aW#0($c%$a`#0($cU$bY#0($bZ$bc#/#$c0$bc#/$$c1$bc#0%$c2$c)#0($c
 &&+&%<&&,&&2&%<&&3&&2&%=&&4&&5&%<&&6&&5&%=&&7&&8&%<&&9&&8&%=&&:&&;&%<&&<&&;&%=&&=&&>&%<&&?&&>&%=&&@&&R&%<&&Z&&S&%<&&[&&T&%<&&]&&U&%<&&^&&a&%<&&b
 3:5#/*3:,3:=#/*3:G4%<4%^4%=4%>4%^4%?4%H4%^4%N4'T4'J4'Q4'U4'J4'R40*4/b40.40*40:40/41%42,41&41'41_41(41.42%41141342,41442%41[42*42%42%42(42%42,42+
 45]45S45`45]45^45_45]45a45b49[49R49^49]49R49_4GX4GS4G[9'A9'A9'D9'A9'B9'F9'A9'C9'H9'A9'L9'E9'D9'B9'I9'D9'C9'K9'E9'B9'J9'L9'B9'G9XF9XJ9XL9XJ9XJ9XK
-9XL9XJ9XM", 9, 16, 961);
+9XL9XJ9XM", 9, 961);
 
 # Full case folding (statuses C and F), by code point.
 const _FOLDING = _Table("#$$##&$#$%#2N$#$&#3($#$'#2O$#$(#2P$#$)#3+$#$*#2T$#$+#,/$#$,#3%$#$-#,1$#$.#2U$#$/#,E$#$0#2V$#$1#G.$#$2##1$#$3#2[$
@@ -773,7 +773,7 @@ $c^$WQ$$c_$WR$$c`$WH%%'I$AQ$%'M#2U$%'N$LS$%'U$WS$%(C$WT$%(D$WU$%(E$WV$%(F$WW$%(G
 9]0$b-$9]1$b.$9]2$b/$9]3$b0$9]4$b1$9]5$b2$9]6$b3$9]7$b4$9]8$b5$9]9$b6$9]:$b7$9];$b8$9]<$b9$9]=$b:$9]>$b;$9]?$b<$
 9]@$b=$9]A$b>$9]B$b?$AG#$b@$AG$$bA$AG%$bB$AG&$bC$AG'$bD$AG($bE$AG)$bF$AG*$bG$AG+$bH$AG,$bI$AG-$bJ$AG.$bK$AG/$bL$
 AG0$bM$AG1$bN$AG2$bO$AG3$bP$AG4$bQ$AG5$bR$AG6$bS$AG7$bT$AG8$bU$AG9$bV$AG:$bW$AG;$bX$AG<$bY$AG=$bZ$AG>$b[$AG?$b]$
-AG@$b^$AGA$b_$AGB$b`$AGC$ba$AGD$bb$", 7, 16, 1557);
+AG@$b^$AGA$b_$AGB$b`$AGC$ba$AGD$bb$", 7, 1557);
 
 # The code points the mappings above map to.
 const _MAPPED = _Table("##C##C#/+#$D##C#/'##U##V##C#/$#1`##C#/J##T#$R##T
@@ -1283,7 +1283,7 @@ $2H$2I$2J$2K$2L$2M$2N$2O$2P$2Q$2R2a$2a%2a&2a'2a(
 9]F9]G9]H9]I9]J9]K9]L9]M9]N9]O9]P9]Q9]R9]S9]T9]U
 9]V9]W9]X9]Y9]Z9][9]]9]^9]_9]`9]a9]b9]cAGEAGFAGG
 AGHAGIAGJAGKAGLAGMAGNAGOAGPAGQAGRAGSAGTAGUAGVAGW
-AGXAGYAGZAG[AG]AG^AG_AG`AGaAGbAGcAH#AH$AH%AH&", 3, 16, 8127);
+AGXAGYAGZAG[AG]AG^AG_AG`AGaAGbAGcAH#AH$AH%AH&", 3, 8127);
 
 # Grapheme properties: Grapheme_Cluster_Break in the low 4 bits, then
 # Extended_Pictographic, then Indic_Conjunct_Break (Linker 1, Consonant 2,
@@ -1357,7 +1357,7 @@ const _GRAPHEME = _Table("#####&###-#%###.#&###0#$###1#&###C####$c#&##%C####%L#3
 #AH.###B###3#B'####B'0#3#B'3###B'R#3#B'S###B(O#3#B(U###B(b#3#B)####B)1#3#B)2###B)4#3#B)>###B)P#3
 #B*I#)#B+####B+$#3#B+3###B+=#3#B+>###B+R#3#B+S###B+U#3#B+_###B+`#3#B,####B,,#3#B2_$G#B3##3#B7b##
 #B8)#3#B<3###B=##3#B?####B@W#3#BA####BB8#3#BC####BC/#3#BC3###BD+#3#BD3###BD=#3#BDC###BE+#3#BE3##
-#BEQ#3#BG####BG/#3#BG_###BG`#3#BH)###BH*#3#BO####BS##3#Bcb##&C###&&C#C$G&C%##&&C'#$G&C*S#&&D####", 6, 16, 1120);
+#BEQ#3#BG####BG/#3#BG_###BG`#3#BH)###BH*#3#BO####BS##3#Bcb##&C###&&C#C$G&C%##&&C'#$G&C*S#&&D####", 6, 1120);
 
 const _GRAPHEME_INDEX = _Table("###(#)#/#/#/#/#/#/#/#/#/#0#0#1#1
 #1#1#1#3#3#3#3#7#>#C#G#G#P#U#V#X
@@ -1486,7 +1486,7 @@ const _GRAPHEME_INDEX = _Table("###(#)#/#/#/#/#/#/#/#/#/#0#0#1#1
 3D3D3D3D3E3I3M3R3T3_3`3`3`3`3`3`
 3b3b3b3b3b3c4#4#4#4#4%4%4&4&4(4(
 4*4,404344474949494949494:4:4:4:
-4;4;4;4;4;4;4;4;4;4;4;4;4;4;4;4;", 2, 16, 2048);
+4;4;4;4;4;4;4;4;4;4;4;4;4;4;4;4;", 2, 2048);
 
 # Word properties: Word_Break in the low 5 bits, then Extended_Pictographic.
 const _WORD = _Table("#########-#%###.#&###0#$###1#####C#5###D#####E#/###F#####J#.###K#####O#2###P#####Q#0###R#####S#3
@@ -1616,7 +1616,7 @@ const _WORD = _Table("#########-#%###.#&###0#$###1#####C#5###D#####E#/###F#####J
 #B*I#)#B+####B+$#C#B+3###B+=#C#B+>###B+R#C#B+S###B+U#C#B+_###B+`#C#B,####B,,#C#B2_#'#B3##C#B7b##
 #B8)#C#B<3###B=##C#B?####B@W#C#BA####BB8#C#BC####BC/#C#BC3###BD+#C#BD3###BD=#C#BDC###BE+#C#BE3##
 #BEQ#C#BG####BG/#C#BG_###BG`#C#BH)###BH*#C#BO####BRS#3#BR^###BS##C#Bcb##&C#$#*&C#%##&C#C#'&C%###
-&C'##'&C*S##", 6, 16, 2034);
+&C'##'&C*S##", 6, 2034);
 
 const _WORD_INDEX = _Table("###5#;#J#N#N#N#N#N#N#N#N#Q#Q#Y#c
 $$$$$$$'$'$)$/$6$C$K$T$T%$%(%*%.
@@ -1745,7 +1745,7 @@ $$$$$$$'$'$)$/$6$C$K$T$T%$%(%*%.
 AOAOAOAOAPATA]AcB$B.B/B/B/B/B/B/
 B1B1B1B1B1B2B3B3B3B3B5B5B6B6B8B8
 B:B<B@BCBDBGBIBIBIBIBIBIBJBJBJBJ
-BMBMBMBMBMBMBMBMBMBMBMBMBMBMBMBM", 2, 16, 2048);
+BMBMBMBMBMBMBMBMBMBMBMBMBMBMBMBM", 2, 2048);
 
 # Display width in columns.
 const _WIDTH = _Table("########C$##$c###%C$##/####0S$##5&###5-$##94###9b$##9c###:#$##:$###:&$##:'###:)$
@@ -1809,7 +1809,7 @@ const _WIDTH = _Table("########C$##$c###%C$##/####0S$##5&###5-$##94###9b$##9c###
 #B8_$#B98%#B9:$#B9G%#B9H$#B:_%#B<3$#B=#%#B>)$#B>/%#B>0$#B>3%#B>6$#B>8%#B>;$#B>?%
 #B>C$#B>N%#B>P$#B>W%#B>a$#BBC%#BBO$#BBS%#BBT$#BG/%#BG_$#BG`%#BH)$#BH*%#BK#$#BLS%
 #BLa$#BM#%#BM-$#BM2%#BN*$#BN1%#BN@$#BNB%#BNM$#BNS%#BN]$#C##%#Rcb$#S##%#ccb$&C#$#
-&C#%$&C#C#&C%#$&C'##&C*S$", 5, 16, 981);
+&C#%$&C#C#&C%#$&C'##&C*S$", 5, 981);
 
 const _WIDTH_INDEX = _Table("###$#%#&#&#&#&#&#&#&#&#&#'#'#(#(
 #(#(#(#*#*#*#*#.#5#:#>#>#F#K#L#N
@@ -1938,6 +1938,6 @@ const _WIDTH_INDEX = _Table("###$#%#&#&#&#&#&#&#&#&#&#'#'#(#(
 0S0U0U0U0W0W0W0[0]0a1%1%1&1*1,1.
 16181:1:1<1=1C1G1H1H1J1J1W1W1W1W
 1[1[1[1[1[1_1a1a1b1b2$2&2-2-2-2-
-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-", 2, 16, 2048);
+2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-", 2, 2048);
 
 # format: on

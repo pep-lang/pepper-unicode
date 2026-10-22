@@ -17,8 +17,7 @@ struct _Table {
     var width: ulong;
     var count: ulong;
 
-    construct(text: StringConstant, width: ulong, per_line: ulong, count: ulong) {
-        assert(per_line == _PER_LINE, "a table of 16 records to a line");
+    construct(text: StringConstant, width: ulong, count: ulong) {
         this.text = text;
         this.width = width;
         this.count = count;
