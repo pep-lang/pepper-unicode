@@ -1,0 +1,11 @@
+[package]
+name = "mypkg"
+version = "0.1.0"
+description = "One line saying what the package does"
+license = "Apache-2.0"
+repository = "https://github.com/OWNER/pepper-mypkg"
+# The oldest Pepper toolchain that builds the package: CI also tests with
+# it, and `pepper package` skips a version whose minimum is newer than the
+# user's toolchain. Toolchains before 0.11 reject the key, so set it only
+# once the package needs 0.11 or later.
+# minimum_toolchain = "0.11.0"

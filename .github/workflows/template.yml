@@ -1,0 +1,44 @@
+# Checks that this template is what `pepper new --lib` writes: pep-new
+# (pep-lang/pepper's tools/pep-new/template.pep) holds these files word for
+# word, so a change here goes there too, and the other way round. Runs with
+# the build of pep-lang/pepper's main, so it sees a change there as soon as
+# it is published. This file and TEMPLATE.md are the template's own and are
+# not compared; delete both in a package made from the template.
+name: Template
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  matches-pepper-new:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install the build of Pepper's main
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="$(curl -fsSL https://raw.githubusercontent.com/pep-lang/pepper/main/VERSION | tr -d '\r')"
+          curl -fsSL https://raw.githubusercontent.com/pep-lang/pepper/main/scripts/install.sh | sh -s -- --version "$version"
+          echo "$HOME/.pepper/bin" >> "$GITHUB_PATH"
+
+      - name: Compare with pepper new
+        run: |
+          set -euo pipefail
+          if ! pepper new --help >/dev/null 2>&1; then
+            echo "this toolchain has no 'pepper new': nothing to compare"
+            exit 0
+          fi
+          pepper new "$RUNNER_TEMP/mypkg" --lib --license Apache-2.0
+          diff -r --exclude=.git --exclude=TEMPLATE.md --exclude=template.yml . "$RUNNER_TEMP/mypkg"
