@@ -101,10 +101,10 @@ and no start-up work:
   arithmetic.
 
 The tables are 140 KB of source. A hello world that calls
-`unicode.normalize` is 196 KB larger than one that does not (690 KB against
-494 KB at `-O` on Windows, Pepper 0.10.1); it carries every table, since
-unused constants are not dropped yet (pep-lang/pepper#155). The code is
-about 1,000 lines.
+`unicode.normalize` is 162 KB larger than one that does not (332 KB against
+169 KB at `-O` on Windows, Pepper 0.11.0); it carries every table, since
+unused table constants are not dropped yet (pep-lang/pepper#269). The code
+is about 1,000 lines.
 
 ## Performance
 
