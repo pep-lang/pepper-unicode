@@ -137,8 +137,7 @@ flags(text: String, name: String): bool[] {
 # The position of `name` in the space-separated `names`.
 index_of(names: String, name: String): uint {
     var all = names.split(" ");
-    # The type is written out for toolchains before pep-lang/pepper#60 (#52).
-    for (var i: ulong in 0..all.count) {
+    for (var i in 0..all.count) {
         if (all[i] == name) {
             return i as uint;
         }
