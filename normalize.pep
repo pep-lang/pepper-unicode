@@ -1,9 +1,9 @@
 ## Unicode normalization (UAX #15): NFC, NFD, NFKC and NFKD, and a quick
 ## check for text that is already normalized.
 
+import generated;
 import text;
 import "lookup";
-import generated;
 import "tables";
 
 ## A Unicode normalization form.

@@ -1,8 +1,8 @@
 ## Display width: how many terminal columns text takes, as `wcwidth` and
 ## `wcswidth` count them.
 
-import "lookup";
 import generated;
+import "lookup";
 
 ## Returns how many columns `cp` takes in a terminal, following `wcwidth`
 ## (Markus Kuhn's rules, with Unicode 16 data):
