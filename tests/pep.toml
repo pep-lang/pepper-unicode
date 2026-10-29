@@ -1,0 +1,8 @@
+# Makes tests/ a project that depends on the package, so that the
+# package's build script runs for the tests (see tests/run.sh).
+[package]
+name = "unicode_tests"
+version = "0.1.0"
+
+[dependencies]
+unicode = { path = ".." }

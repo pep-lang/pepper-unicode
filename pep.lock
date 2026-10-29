@@ -1,0 +1,10 @@
+# Written by `pepper package`: the exact revision of every dependency.
+# Commit it with pep.toml; do not edit it by hand.
+version = 1
+
+[[package]]
+name = "trie"
+source = "github:pep-lang/pepper-trie"
+version = "0.1.0"
+commit = "f3b1452c26eb6eac127175eff6b1d262a0e2f9cb"
+sha256 = "8a50c9e23fa4a90ea5aeef9f964bf792384acc9d6e393e9c391df7d3a070dffd"

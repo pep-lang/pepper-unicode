@@ -18,6 +18,22 @@ normalizes_the_examples() {
     expect_equal(unicode.normalize("plain ASCII"), "plain ASCII");
 }
 
+# Each form's own function gives what `normalize` gives for the form.
+[Test]
+normalizes_with_each_forms_function() {
+    expect_equal(unicode.nfc("cafe\u{301}"), "caf\u{E9}");
+    expect_equal(unicode.nfd("caf\u{E9}"), "cafe\u{301}");
+    expect_equal(unicode.nfkc("\u{FB01}\u{2460}"), "fi1");
+    expect_equal(unicode.nfkd("\u{1E9B}\u{323}"), "s\u{323}\u{307}");
+    expect_equal(unicode.nfc("\u{1E9B}\u{323}"), "\u{1E9B}\u{323}");
+    for (var sample in ["plain", "\u{D55C}", "a\u{301}\u{323}", "\u{FB01}", "\u{2126}", ""]) {
+        expect_equal(unicode.nfc(sample), unicode.normalize(sample, unicode.Form.Nfc));
+        expect_equal(unicode.nfd(sample), unicode.normalize(sample, unicode.Form.Nfd));
+        expect_equal(unicode.nfkc(sample), unicode.normalize(sample, unicode.Form.Nfkc));
+        expect_equal(unicode.nfkd(sample), unicode.normalize(sample, unicode.Form.Nfkd));
+    }
+}
+
 [Test]
 normalize_returns_a_copy() {
     var source = "abc";

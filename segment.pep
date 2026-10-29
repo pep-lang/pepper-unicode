@@ -1,8 +1,8 @@
 ## Text segmentation (UAX #29): extended grapheme clusters, the
 ## user-perceived characters, and word boundaries.
 
+import generated;
 import "lookup";
-import "tables";
 
 # Grapheme_Cluster_Break values, numbered as the generator numbers them.
 const _G_OTHER: uint = 0;
@@ -132,7 +132,7 @@ _grapheme_properties(cp: uint): uint {
         }
         return _G_LVT;
     }
-    return _GRAPHEME.property(cp, 2, _GRAPHEME_INDEX);
+    return generated._GRAPHEME.get(cp) as uint;
 }
 
 # The byte offset of the first grapheme cluster boundary after `start`.
@@ -322,7 +322,7 @@ _word_properties(cp: uint): uint {
             return _W_NUMERIC;
         }
     }
-    return _WORD.property(cp, 2, _WORD_INDEX);
+    return generated._WORD.get(cp) as uint;
 }
 
 # Extend, Format and ZWJ, which WB4 attaches to what comes before them.

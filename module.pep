@@ -4,7 +4,8 @@
 ##
 ## Bring it in with `import unicode`.
 ##
-## - `normalize`, `is_normalized`, `Form`: NFC, NFD, NFKC and NFKD (UAX #15)
+## - `normalize`, `nfc`, `nfd`, `nfkc`, `nfkd`, `is_normalized`, `Form`: NFC,
+##   NFD, NFKC and NFKD (UAX #15)
 ## - `graphemes`, `Graphemes`: extended grapheme clusters (UAX #29)
 ## - `words`, `Words`: the pieces between word boundaries (UAX #29)
 ## - `display_width`, `code_point_width`: terminal columns, as `wcwidth`
@@ -26,13 +27,17 @@
 # This file only gathers the module's public API from its other files.
 
 import "case";
+import "lookup";
 import "normalize";
 import "segment";
-import "tables";
 import "width";
 
 export Form;
 export normalize;
+export nfc;
+export nfd;
+export nfkc;
+export nfkd;
 export is_normalized;
 export Graphemes;
 export graphemes;

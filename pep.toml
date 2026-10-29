@@ -4,8 +4,15 @@ version = "1.0.0"
 description = "Unicode normalization, grapheme and word segmentation, display width and case folding"
 license = "Apache-2.0"
 repository = "https://github.com/pep-lang/pepper-unicode"
-# The oldest Pepper toolchain that builds the package: CI also tests with
-# it, and `pepper package` skips a version whose minimum is newer than the
-# user's toolchain. Toolchains before 0.11 reject the key, so set it only
-# once the package needs 0.11 or later.
-# minimum_toolchain = "0.11.0"
+# The oldest Pepper toolchain that builds the package (pepper-trie needs
+# 0.11): CI also tests with it, and `pepper package` skips a version whose
+# minimum is newer than the user's toolchain.
+minimum_toolchain = "0.11.0"
+
+# The build script (build.pep) builds the package's data into StaticTries;
+# the module it generates names their type.
+[build-dependencies]
+trie = { github = "pep-lang/pepper-trie", version = "0.1.0" }
+
+[dependencies]
+trie = { github = "pep-lang/pepper-trie", version = "0.1.0" }
