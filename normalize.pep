@@ -411,5 +411,4 @@ _composite(first: uint, second: uint): uint {
         }
         at = at + 2;
     }
-    return 0;
 }

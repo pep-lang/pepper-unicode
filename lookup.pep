@@ -49,7 +49,6 @@ struct _Mapping {
             }
             at = at + 1;
         }
-        return true;
     }
 }
 
