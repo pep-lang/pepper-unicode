@@ -1,9 +1,9 @@
 ## Full case folding and caseless comparison.
 
+import generated;
 import text;
 import "lookup";
 import "normalize";
-import "tables";
 
 ## Returns `value` with full case folding (CaseFolding.txt's C and F
 ## mappings) applied: the form to compare text in without regard to case.
@@ -24,6 +24,8 @@ export case_fold(value: String): String {
         return value.lower();
     }
     var out = Array<u8>(value.size);
+    var folding = _Mapping(generated._FOLDING, generated._FOLDING_POINTS);
+    uint[] folded = [];
     ulong offset = 0;
     while (offset < value.size) {
         var (cp, run) = _decode(value, offset);
@@ -32,17 +34,13 @@ export case_fold(value: String): String {
             out.append((cp + 32) as u8);
             continue;
         }
-        var found = _FOLDING.count;
-        if (cp >= 128 && cp < _MAPPED_LIMIT) {
-            found = _FOLDING.find(cp as ulong, 3);
-        }
-        if (found == _FOLDING.count) {
+        folded.clear();
+        if (cp < 128 || !folding.append_to(cp, folded)) {
             text.Utf8.append_code_point(out, cp);
             continue;
         }
-        var start = _FOLDING.read(found, 3, 3);
-        for (var i in start..start + _FOLDING.read(found, 6, 1)) {
-            text.Utf8.append_code_point(out, _MAPPED.read(i, 0, 3) as uint);
+        for (var part in folded) {
+            text.Utf8.append_code_point(out, part);
         }
     }
     return text.Utf8.decode_lossy(out);
@@ -70,5 +68,5 @@ export equals_ignoring_case(a: String, b: String): bool {
 
 # The canonical caseless form of `value`.
 _caseless(value: String): String {
-    return normalize(case_fold(normalize(value, Form.Nfd)), Form.Nfd);
+    return nfd(case_fold(nfd(value)));
 }

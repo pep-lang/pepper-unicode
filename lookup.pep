@@ -1,91 +1,55 @@
-## Reading the tables of `tables.pep`, and decoding text one code point at
-## a time.
+## Reading the mapping data build.pep generates, and decoding text one
+## code point at a time.
 
 import text;
+import trie;
 
-# Records per line of a table's text.
-const _PER_LINE: ulong = 16;
+## The version of Unicode the package follows.
+export const UNICODE_VERSION = "16.0.0";
 
-# A table of `count` records of `width` base-64 digits each, 16 to a line.
-# A digit is one of 64 ASCII characters from '#' (0) up, skipping '\', so
-# the text is a string constant: it costs no allocation and no start-up
-# work, and only its bytes in the binary. Lines may end in "\r\n" when a
-# checkout converts line endings.
+# Bit 18 of a mapping unit: the last code point of a sequence.
+const _LAST: uint = 0x40000;
+const _CODE_POINT: uint = 0x3FFFF;
+
+# Unit `index` of mapping data: three bytes, 7 bits each, low first (see
+# `_literal` in build.pep).
+# shortcut: 7 bits a byte until a stable Pepper has pep-lang/pepper#298;
+# then 8, with `_literal` (#5).
+_unit(data: StringConstant, index: ulong): uint {
+    __ptr<char> bytes = data.c_str();
+    var at = index * 3;
+    return (bytes[at] as uint) | ((bytes[at + 1] as uint) << 7) | ((bytes[at + 2] as uint) << 14);
+}
+
+# A mapping: a trie whose value for each code point is 1 plus where its
+# sequence starts in `points`, or 0 when it has none.
 [Value]
-struct _Table {
-    var text: StringConstant;
-    var width: ulong;
-    var count: ulong;
+struct _Mapping {
+    var keys: trie.StaticTrie<uint>;
+    var points: StringConstant;
 
-    construct(text: StringConstant, width: ulong, count: ulong) {
-        this.text = text;
-        this.width = width;
-        this.count = count;
+    construct(keys: trie.StaticTrie<uint>, points: StringConstant) {
+        this.keys = keys;
+        this.points = points;
     }
 
-    # The `size`-digit number at digit `offset` of record `index`.
-    read(index: ulong, offset: ulong, size: ulong): ulong {
-        __ptr<char> data = text.c_str();
-        var line = width * _PER_LINE;
-        var stride = line + 1;
-        if (text.size > line && data[line] == '\r') {
-            stride = line + 2;
+    # Appends the code points `cp` maps to; returns false, appending
+    # nothing, when it has none.
+    append_to(cp: uint, out: uint[]): bool {
+        var start = keys.get(cp) as ulong;
+        if (start == 0) {
+            return false;
         }
-        var at = (index / _PER_LINE) * stride + (index % _PER_LINE) * width + offset;
-        ulong value = 0;
-        for (var i in 0..size) {
-            var c = data[at + i] as ulong;
-            var d = c - 35;
-            if (c > 92) {
-                d = d - 1;
+        var at = start - 1;
+        while (true) {
+            var unit = _unit(points, at);
+            out.append(unit & _CODE_POINT);
+            if ((unit & _LAST) != 0) {
+                return true;
             }
-            value = (value << 6) | d;
+            at = at + 1;
         }
-        return value;
-    }
-
-    # The value of a property table (records of a 4-digit first code point
-    # and a `size`-digit value) for the run that holds `cp`. `index` is the
-    # table's `_INDEX`: the record each block of 64 code points below
-    # U+20000 starts in, which narrows the search to that block's runs.
-    property(cp: uint, size: ulong, index: _Table): uint {
-        ulong low = 0;
-        var high = count;
-        if (cp < 0x20000) {
-            var block = (cp >> 6) as ulong;
-            low = index.read(block, 0, 2);
-            if (block + 1 < index.count) {
-                high = index.read(block + 1, 0, 2) + 1;
-            }
-        }
-        while (high - low > 1) {
-            var middle = (low + high) / 2;
-            if (read(middle, 0, 4) <= cp) {
-                low = middle;
-            } else {
-                high = middle;
-            }
-        }
-        return read(low, 4, size) as uint;
-    }
-
-    # The record whose first `size` digits are `key`, or `count` when none is.
-    find(key: ulong, size: ulong): ulong {
-        ulong low = 0;
-        var high = count;
-        while (low < high) {
-            var middle = (low + high) / 2;
-            var at = read(middle, 0, size);
-            if (at == key) {
-                return middle;
-            }
-            if (at < key) {
-                low = middle + 1;
-            } else {
-                high = middle;
-            }
-        }
-        return count;
+        return true;
     }
 }
 

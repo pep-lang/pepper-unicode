@@ -4,7 +4,6 @@
 import generated;
 import text;
 import "lookup";
-import "tables";
 
 ## A Unicode normalization form.
 export enum Form {
@@ -34,20 +33,21 @@ const _T_COUNT: uint = 28;
 const _N_COUNT: uint = 588;
 const _S_COUNT: uint = 11172;
 
-# Every code point a mapping table names is below this (18 bits).
-const _MAPPED_LIMIT: uint = 0x30000;
-
 # The quick-check answers.
 const _YES = 0;
 const _NO = 1;
 const _MAYBE = 2;
 
-## Returns `value` in normalization form `form`.
+# NFD_QC No and NFKD_QC No: the code point has a canonical, or a
+# compatibility, decomposition.
+const _CANONICAL_BIT: uint = 0x100;
+const _COMPATIBILITY_BIT: uint = 0x200;
+
+## Returns `value` in normalization form `form`: `nfc`, `nfd`, `nfkc` or
+## `nfkd` of it.
 ##
-## Text that is already in the form, all-ASCII text included, is found so by
-## a quick check that decodes it once, and copied. Otherwise it is
-## decomposed, put in canonical order, and for `Nfc` and `Nfkc` composed
-## again.
+## A program that calls only `nfc` (or `nfd`) does not carry the
+## compatibility data that `normalize` brings in for `Nfkc` and `Nfkd`.
 ##
 ## @param value the text to normalize; it must be valid UTF-8
 ## @param form the normalization form
@@ -60,27 +60,99 @@ const _MAYBE = 2;
 ##     assert(unicode.normalize("\u{E9}", unicode.Form.Nfd) == decomposed, "NFD splits it");
 ##     assert(unicode.normalize("\u{FB01}", unicode.Form.Nfkc) == "fi", "NFKC splits the ligature");
 export normalize(value: String, form: Form = Form.Nfc): String {
-    if (_quick_check(value, form) == _YES) {
+    match (form) {
+        Nfc => {
+            return nfc(value);
+        }
+        Nfd => {
+            return nfd(value);
+        }
+        Nfkc => {
+            return nfkc(value);
+        }
+        Nfkd => {
+            return nfkd(value);
+        }
+    }
+}
+
+## Returns `value` in NFC: decomposed canonically, then composed again.
+##
+## Text already in NFC, all-ASCII text included, is found so by a quick
+## check that decodes it once, and copied.
+##
+## @param value the text to normalize; it must be valid UTF-8
+## @returns a new String in NFC
+## @example
+##     import unicode;
+##
+##     assert(unicode.nfc("e\u{301}") == "\u{E9}", "composes é");
+export nfc(value: String): String {
+    if (_quick_check(value, Form.Nfc) == _YES) {
         return value.copy();
     }
-    var compatibility = form == Form.Nfkc || form == Form.Nfkd;
-    uint[] points = [];
-    uint[] properties = [];
-    ulong offset = 0;
-    while (offset < value.size) {
-        var (cp, run) = _decode(value, offset);
-        offset = offset + run;
-        _decompose(cp, compatibility, points, properties);
+    var (points, properties) = _decompose_all(value, _CANONICAL_BIT, _canonical());
+    _compose(points, properties);
+    return _encode(points);
+}
+
+## Returns `value` in NFD: every precomposed character split into its base
+## and combining marks, the marks in canonical order.
+##
+## Text already in NFD is found so by a quick check and copied.
+##
+## @param value the text to normalize; it must be valid UTF-8
+## @returns a new String in NFD
+## @example
+##     import unicode;
+##
+##     assert(unicode.nfd("\u{E9}") == "e\u{301}", "splits é");
+export nfd(value: String): String {
+    if (_quick_check(value, Form.Nfd) == _YES) {
+        return value.copy();
     }
-    _reorder(points, properties);
-    if (form == Form.Nfc || form == Form.Nfkc) {
-        _compose(points, properties);
+    var (points, _) = _decompose_all(value, _CANONICAL_BIT, _canonical());
+    return _encode(points);
+}
+
+## Returns `value` in NFKC: as `nfc`, after also replacing compatibility
+## characters (ligatures, full-width forms, superscripts) with their plain
+## equivalents.
+##
+## Text already in NFKC is found so by a quick check and copied.
+##
+## @param value the text to normalize; it must be valid UTF-8
+## @returns a new String in NFKC
+## @example
+##     import unicode;
+##
+##     assert(unicode.nfkc("\u{FB01}") == "fi", "splits the ligature");
+export nfkc(value: String): String {
+    if (_quick_check(value, Form.Nfkc) == _YES) {
+        return value.copy();
     }
-    var out = Array<u8>(points.count);
-    for (var cp in points) {
-        text.Utf8.append_code_point(out, cp);
+    var (points, properties) = _decompose_all(value, _COMPATIBILITY_BIT, _compatibility());
+    _compose(points, properties);
+    return _encode(points);
+}
+
+## Returns `value` in NFKD: as `nfd`, with compatibility characters
+## replaced by their plain equivalents too.
+##
+## Text already in NFKD is found so by a quick check and copied.
+##
+## @param value the text to normalize; it must be valid UTF-8
+## @returns a new String in NFKD
+## @example
+##     import unicode;
+##
+##     assert(unicode.nfkd("\u{2460}") == "1", "a circled digit");
+export nfkd(value: String): String {
+    if (_quick_check(value, Form.Nfkd) == _YES) {
+        return value.copy();
     }
-    return text.Utf8.decode_lossy(out);
+    var (points, _) = _decompose_all(value, _COMPATIBILITY_BIT, _compatibility());
+    return _encode(points);
 }
 
 ## Returns whether `value` is in normalization form `form`, so that
@@ -107,22 +179,49 @@ export is_normalized(value: String, form: Form = Form.Nfc): bool {
     return normalize(value, form) == value;
 }
 
+# The decompositions a canonical form reads.
+_canonical(): _Decompositions {
+    var canonical = _Mapping(generated._CANONICAL, generated._CANONICAL_POINTS);
+    return _Decompositions(canonical, canonical);
+}
+
+# The decompositions a compatibility form reads: its own where they differ
+# from the canonical ones.
+_compatibility(): _Decompositions {
+    return _Decompositions(
+        _Mapping(generated._COMPATIBILITY, generated._COMPATIBILITY_POINTS),
+        _Mapping(generated._CANONICAL, generated._CANONICAL_POINTS)
+    );
+}
+
+# The full decomposition of a code point: `first`'s, else `fallback`'s.
+[Value]
+struct _Decompositions {
+    var first: _Mapping;
+    var fallback: _Mapping;
+
+    construct(first: _Mapping, fallback: _Mapping) {
+        this.first = first;
+        this.fallback = fallback;
+    }
+}
+
 # The normalization properties of `cp`: the canonical combining class in
-# the low 8 bits, then the quick-check bits (see tables.pep).
+# the low 8 bits, then the quick-check bits (see build.pep).
 _normalization_properties(cp: uint): uint {
     return generated._NORMALIZATION_VALUES.get(generated._NORMALIZATION.get(cp) as uint) as uint;
 }
 
 # The UAX #15 quick check of `value` for `form`: _YES, _NO or _MAYBE.
 _quick_check(value: String, form: Form): int {
-    uint no_bit = 0x100;
+    uint no_bit = _CANONICAL_BIT;
     uint maybe_bit = 0;
     # Every code point below this is in the form and has class 0: U+00A0
     # is the first with a compatibility decomposition, U+0300 the first
     # combining mark.
     uint plain = 0xA0;
     if (form == Form.Nfkd) {
-        no_bit = 0x200;
+        no_bit = _COMPATIBILITY_BIT;
     } else if (form == Form.Nfc) {
         no_bit = 0x400;
         maybe_bit = _NFC_MAYBE;
@@ -163,20 +262,40 @@ _quick_check(value: String, form: Form): int {
     return result;
 }
 
+# The full decomposition of `value`, in canonical order, and the
+# normalization properties of each of its code points. `decomposes` is
+# the property bit of a code point that `decompositions` decomposes.
+_decompose_all(value: String, decomposes: uint, decompositions: _Decompositions): (uint[], uint[]) {
+    uint[] points = [];
+    uint[] properties = [];
+    ulong offset = 0;
+    while (offset < value.size) {
+        var (cp, run) = _decode(value, offset);
+        offset = offset + run;
+        _decompose(cp, decomposes, decompositions, points, properties);
+    }
+    _reorder(points, properties);
+    return (points, properties);
+}
+
+# `points` as UTF-8.
+_encode(points: uint[]): String {
+    var out = Array<u8>(points.count);
+    for (var cp in points) {
+        text.Utf8.append_code_point(out, cp);
+    }
+    return text.Utf8.decode_lossy(out);
+}
+
 # Appends the full decomposition of `cp` to `points`, and the
 # normalization properties of each code point to `properties`.
-_decompose(cp: uint, compatibility: bool, points: uint[], properties: uint[]) {
+_decompose(cp: uint, decomposes: uint, decompositions: _Decompositions, points: uint[], properties: uint[]) {
     if (cp < 128) {
         points.append(cp);
         properties.append(0);
         return;
     }
     var own = _normalization_properties(cp);
-    # NFD_QC or NFKD_QC No: the code point has a decomposition.
-    uint decomposes = 0x100;
-    if (compatibility) {
-        decomposes = 0x200;
-    }
     if ((own & decomposes) == 0) {
         points.append(cp);
         properties.append(own);
@@ -195,20 +314,12 @@ _decompose(cp: uint, compatibility: bool, points: uint[], properties: uint[]) {
         }
         return;
     }
-    var table = _COMPATIBILITY;
-    var found = table.count;
-    if (compatibility) {
-        found = table.find(cp as ulong, 3);
+    var start = points.count;
+    if (!decompositions.first.append_to(cp, points)) {
+        decompositions.fallback.append_to(cp, points);
     }
-    if (found == table.count) {
-        table = _CANONICAL;
-        found = table.find(cp as ulong, 3);
-    }
-    var start = table.read(found, 3, 3);
-    for (var i in start..start + table.read(found, 6, 1)) {
-        var part = _MAPPED.read(i, 0, 3) as uint;
-        points.append(part);
-        properties.append(_normalization_properties(part));
+    for (var i in start..points.count) {
+        properties.append(_normalization_properties(points[i]));
     }
 }
 
@@ -284,12 +395,21 @@ _composite(first: uint, second: uint): uint {
         && second < _T_BASE + _T_COUNT) {
         return first + (second - _T_BASE);
     }
-    if (first >= _MAPPED_LIMIT || second >= _MAPPED_LIMIT) {
+    var start = generated._COMPOSITION.get(first) as ulong;
+    if (start == 0) {
         return 0;
     }
-    var found = _COMPOSITION.find(((first as ulong) << 18) | (second as ulong), 6);
-    if (found == _COMPOSITION.count) {
-        return 0;
+    # The pairs of `first`: (second, composite), its last second marked.
+    var at = start - 1;
+    while (true) {
+        var unit = _unit(generated._COMPOSITION_PAIRS, at);
+        if ((unit & _CODE_POINT) == second) {
+            return _unit(generated._COMPOSITION_PAIRS, at + 1);
+        }
+        if ((unit & _LAST) != 0) {
+            return 0;
+        }
+        at = at + 2;
     }
-    return _COMPOSITION.read(found, 6, 3) as uint;
+    return 0;
 }

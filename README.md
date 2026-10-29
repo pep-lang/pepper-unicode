@@ -4,13 +4,17 @@ The Unicode algorithms the [Pepper](https://github.com/pep-lang/pepper)
 runtime leaves out: normalization, grapheme cluster and word segmentation,
 terminal display width, and full case folding. For comparing strings and
 identifiers correctly, moving a cursor by user-perceived characters, and
-lining up text in a terminal. Pure Pepper with Unicode **16.0.0** data, no
-dependencies beyond the runtime.
+lining up text in a terminal. Pure Pepper with Unicode **16.0.0** data,
+held in [pepper-trie](https://github.com/pep-lang/pepper-trie)'s
+`StaticTrie`s.
 
 One module, **`unicode`**:
 
 - **`normalize(text, form = Form.Nfc)`** returns `text` in a normalization
   form (UAX #15): `Form.Nfc`, `Form.Nfd`, `Form.Nfkc` or `Form.Nfkd`.
+  **`nfc(text)`**, **`nfd(text)`**, **`nfkc(text)`** and **`nfkd(text)`**
+  each give one form; a program that calls only `nfc` or `nfd` leaves out
+  the compatibility data (see [Data](#data)).
 - **`is_normalized(text, form = Form.Nfc)`** says whether `text` is already
   in that form, with the UAX #15 quick check (it normalizes only for the
   few characters whose answer is "maybe").
@@ -85,42 +89,66 @@ The tests run the Unicode 16.0 conformance files, committed in
 
 ## Data
 
-`tables.pep` holds the data, made from the Unicode Character Database by
-`generate/main.pep` (run by hand, see its header; tests/run.sh builds it so
-it keeps working). Nothing is downloaded at build time. Each table is a
-string constant of base-64 digits, so it costs only its bytes in the binary
-and no start-up work:
+The package's build script, `build.pep`, makes the data from the Unicode
+Character Database files committed in `ucd/` (with the helpers in
+`generate/ucd.pep`) and writes it into the package's generated module; it
+runs again only when `ucd/` changes. Nothing is downloaded at build time.
+Each table is a constant the compiler keeps as static data, so it costs
+only its bytes in the binary, no start-up work, and nothing in a program
+that never reads it:
 
-- property tables (combining class and quick-check values, grapheme and
-  word break values, width) list the code point where each run of one value
-  starts, with an index of 64-code-point blocks below U+20000 that narrows
-  each lookup to one block's runs;
-- mapping tables (full canonical and compatibility decompositions, full
-  case folding, canonical compositions) list sorted keys and point into one
-  shared list of code points. Hangul syllables decompose and compose by
+- each property (combining class and quick-check values, through a palette
+  of their 70 combinations; grapheme and word break values; width) is a
+  pepper-trie `StaticTrie`: two or three byte reads a lookup;
+- each mapping (full canonical decompositions, full compatibility
+  decompositions where they differ, full case folding) is a `StaticTrie`
+  whose value says where the code point's sequence starts in packed code
+  point data, as ICU's normalization data does; the canonical compositions
+  are one such trie keyed by the first code point, pointing at its
+  (second, composite) pairs. Hangul syllables decompose and compose by
   arithmetic.
 
-The tables are 140 KB of source. A hello world that calls
-`unicode.normalize` is 113 KB larger than one that does not (281 KB against
-168 KB at `-O` on Windows, Pepper 0.11.1): it carries the normalization
-tables only, since unused table constants are dropped (pep-lang/pepper#271).
-One that also folds case, measures width and segments text is 342 KB.
-The code is about 1,000 lines.
+The data takes 7 bits a byte, since stable Pepper keeps only bytes up to
+0x7F in a string constant (pep-lang/pepper#298, #5).
+
+To move to a new Unicode version, replace the files in `ucd/` with that
+version's (UnicodeData.txt, DerivedNormalizationProps.txt, CaseFolding.txt,
+EastAsianWidth.txt, DerivedCoreProperties.txt,
+auxiliary/GraphemeBreakProperty.txt, auxiliary/WordBreakProperty.txt,
+emoji/emoji-data.txt and extracted/DerivedGeneralCategory.txt, flat), set
+`UNICODE_VERSION` in `lookup.pep`, and copy its NormalizationTest.txt,
+GraphemeBreakTest.txt and WordBreakTest.txt into `tests/fixtures/`.
+
+The data is 116 KB. A program carries only the tables it reads, since
+unused constants are dropped (pep-lang/pepper#271). At `-O` on Windows,
+Pepper 0.11.1, against a hello world of 170 KB:
+
+| hello world that calls | size | larger by |
+| --- | --- | --- |
+| `unicode.normalize` (all four forms) | 271 KB | 101 KB |
+| `unicode.nfc` only | 245 KB | 75 KB |
+| `case_fold`, `display_width`, `graphemes` and `words` | 252 KB | 82 KB |
+
+A project's first build of a program that uses the package also compiles
+and runs the build script, which takes about 30 s, most of it compiling
+the script (pep-lang/pepper#419); later builds reuse its output. The code
+is about 1,600 lines, the build script included.
 
 ## Performance
 
-Best of 9, `-O`, Windows 11, Pepper 0.10.1:
+Best of 9, `-O`, Windows 11, Pepper 0.11.1:
 
 | | MB/s |
 | --- | --- |
-| NFC of ASCII text (560 KB) | 510 |
-| NFC of mixed text already in NFC (1 MB of French, Greek, Japanese, Korean, emoji) | 62 |
-| NFC of that text in NFD | 16 |
-| NFD of the mixed text | 19 |
-| NFKC of the mixed text | 52 |
-| `display_width` of the mixed text | 97 |
-| `case_fold` of the mixed text | 29 |
-| `graphemes` / `words` of the mixed text, to an array | 28 / 22 |
+| NFC of ASCII text (560 KB) | 498 |
+| NFC of mixed text already in NFC (1 MB of French, Greek, Japanese, Korean, emoji) | 186 |
+| NFC of that text in NFD | 34 |
+| NFD of the mixed text | 37 |
+| NFKC of the mixed text | 178 |
+| `is_normalized` of the mixed text | 182 |
+| `display_width` of the mixed text | 168 |
+| `case_fold` of the mixed text | 89 |
+| `graphemes` / `words` of the mixed text, to an array | 38 / 36 |
 
 All-ASCII text is in every form, so `normalize` only scans its bytes and
 copies it. Text that passes the quick check (most text, in NFC) is copied
@@ -181,6 +209,6 @@ package update` find versions by their tags.
 
 ## License
 
-Apache-2.0; see [LICENSE](LICENSE). The data in `tables.pep` and
+Apache-2.0; see [LICENSE](LICENSE). The data in `ucd/` and
 `tests/fixtures/` comes from the Unicode Character Database, under the
 Unicode License v3; see [LICENSE-UNICODE](LICENSE-UNICODE).

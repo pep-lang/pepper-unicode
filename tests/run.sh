@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
-# Runs the package's tests (the [Test] functions in tests/, with pepper test)
-# and builds the table generator.
+# Runs the package's tests (the [Test] functions in tests/, with pepper test).
 #
 # Usage: tests/run.sh [path/to/pepper]   (default: pepper on PATH)
 set -euxo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 pepper="${1:-pepper}"
-build="$(mktemp -d)"
-trap 'rm -rf "$build"' EXIT
 
 # tests/pep.toml makes tests/ a project that depends on the package, so the
 # package's build script runs and makes its generated module: a package on
@@ -16,5 +13,3 @@ trap 'rm -rf "$build"' EXIT
 # relative to the root.
 cd "$root"
 "$pepper" test tests
-# The table generator is run by hand; building it keeps it working.
-"$pepper" build generate/main.pep -o "$build/generate"
