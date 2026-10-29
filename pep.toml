@@ -9,3 +9,11 @@ repository = "https://github.com/pep-lang/pepper-unicode"
 # user's toolchain. Toolchains before 0.11 reject the key, so set it only
 # once the package needs 0.11 or later.
 # minimum_toolchain = "0.11.0"
+
+# The build script (build.pep) builds the normalization and width tables
+# into StaticTries; the module it generates names their type.
+[build-dependencies]
+trie = { path = "../pepper-trie" }
+
+[dependencies]
+trie = { path = "../pepper-trie" }

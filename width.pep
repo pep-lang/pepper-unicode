@@ -2,7 +2,7 @@
 ## `wcswidth` count them.
 
 import "lookup";
-import "tables";
+import generated;
 
 ## Returns how many columns `cp` takes in a terminal, following `wcwidth`
 ## (Markus Kuhn's rules, with Unicode 16 data):
@@ -31,7 +31,7 @@ export code_point_width(cp: uint): ulong {
         }
         return 1;
     }
-    return _WIDTH.property(cp, 1, _WIDTH_INDEX) as ulong;
+    return generated._WIDTH.get(cp) as ulong;
 }
 
 ## Returns how many columns `value` takes in a terminal: the sum of

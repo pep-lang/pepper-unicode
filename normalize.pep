@@ -3,6 +3,7 @@
 
 import text;
 import "lookup";
+import generated;
 import "tables";
 
 ## A Unicode normalization form.
@@ -109,7 +110,7 @@ export is_normalized(value: String, form: Form = Form.Nfc): bool {
 # The normalization properties of `cp`: the canonical combining class in
 # the low 8 bits, then the quick-check bits (see tables.pep).
 _normalization_properties(cp: uint): uint {
-    return _NORMALIZATION.property(cp, 3, _NORMALIZATION_INDEX);
+    return generated._NORMALIZATION_VALUES.get(generated._NORMALIZATION.get(cp) as uint) as uint;
 }
 
 # The UAX #15 quick check of `value` for `form`: _YES, _NO or _MAYBE.
