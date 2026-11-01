@@ -6,14 +6,12 @@
 
 import [File, Path] from io;
 import os;
-import text;
 import trie;
 import "generate/ucd";
 
 # The mapping data's code points take 18 bits; bit 18 marks the last one of
 # a sequence (see `_unit` in lookup.pep).
 const _LAST: uint = 0x40000;
-const _HEX = "0123456789ABCDEF";
 
 # A StaticTrie of `values`, one per code point, as Pepper source. The small
 # layout: the fast layout's index for the whole BMP costs more than it saves.
@@ -27,7 +25,7 @@ _trie(values: uint[], value_type: String): String {
 
 # `values` with each value replaced by its number in the palette (the
 # distinct values in order of first appearance), and the palette. Fewer
-# than 128 distinct values take one byte each in a trie, not two.
+# than 256 distinct values take one byte each in a trie, not two.
 _palette(values: uint[]): (uint[], uint[]) {
     var numbers = HashMap<uint, uint>();
     uint[] palette = [];
@@ -42,35 +40,42 @@ _palette(values: uint[]): (uint[], uint[]) {
     return (coded, palette);
 }
 
-# `units` as a string literal: three bytes each, 7 bits a byte, low first.
-# shortcut: 7 bits a byte, because stable Pepper keeps only bytes up to
-# 0x7F in a string constant; use 8 once a stable release has
-# pep-lang/pepper#298 (and change `_unit` in lookup.pep with it; #5).
-_literal(units: uint[]): String {
-    var out = Array<u8>();
-    out.append('"' as u8);
+# `units` packed as `_unit` in lookup.pep reads them, and where each unit
+# starts. A unit is 2 bytes below U+4000 and 3 above: the code point's low
+# 8 bits; then bits 8 to 13, bit 6 for `_LAST` and bit 7 when a third byte
+# holds bits 14 up.
+_pack(units: uint[]): (u8[], uint[]) {
+    u8[] bytes = [];
+    uint[] starts = [];
     for (var unit in units) {
-        for (var i in 0..3) {
-            var b = ((unit >> (7 * i) as uint) & 127) as u8;
-            if (b == '"' as u8 || b == '\\' as u8) {
-                out.append('\\' as u8);
-                out.append(b);
-            } else if (b >= 0x20 && b < 0x7F) {
-                out.append(b);
-            } else {
-                out.append('\\' as u8);
-                out.append('x' as u8);
-                out.append(_HEX.byte_at((b >> 4) as ulong) as u8);
-                out.append(_HEX.byte_at((b & 15) as ulong) as u8);
-            }
+        starts.append(bytes.count as uint);
+        var cp = unit & (_LAST - 1);
+        var second = ((cp >> 8) & 0x3F) | ((unit & _LAST) != 0 ? 0x40 : 0);
+        bytes.append((cp & 0xFF) as u8);
+        if (cp < 0x4000) {
+            bytes.append(second as u8);
+        } else {
+            bytes.append((second | 0x80) as u8);
+            bytes.append((cp >> 14) as u8);
         }
     }
-    out.append('"' as u8);
-    return text.Utf8.decode_lossy(out);
+    return (bytes, starts);
+}
+
+# The trie of `values`, each 1 plus a unit's index, and the literal of
+# `units`, with each value turned into 1 plus where its unit's bytes start.
+_pointers(values: uint[], units: uint[]): (String, String) {
+    var (bytes, starts) = _pack(units);
+    for (var i in 0..values.count) {
+        if (values[i] != 0) {
+            values[i] = starts[values[i] as ulong - 1] + 1;
+        }
+    }
+    return (_trie(values, "uint"), trie.byte_literal(bytes));
 }
 
 # A mapping as two constants: `<name>`, a trie whose value for each key is
-# 1 plus the unit its code points start at in `<name>_POINTS` (0 for a key
+# 1 plus the byte its code points start at in `<name>_POINTS` (0 for a key
 # with no mapping), and `<name>_POINTS`, the code points, each sequence's
 # last one marked `_LAST`. Equal sequences are stored once.
 _mapping(out: StringBuilder, name: String, comment: String, mappings: (uint, uint[])[]) {
@@ -91,10 +96,11 @@ _mapping(out: StringBuilder, name: String, comment: String, mappings: (uint, uin
         }
         values[cp as ulong] = seen[key];
     }
+    var (keys, points) = _pointers(values, units);
     out.append(comment);
-    out.append($"export const {name} = ").append(_trie(values, "uint")).append(";\n\n");
+    out.append($"export const {name} = ").append(keys).append(";\n\n");
     out.append($"## The code points `{name}` points into.\n");
-    out.append($"export const {name}_POINTS = ").append(_literal(units)).append(";\n\n");
+    out.append($"export const {name}_POINTS: StringConstant = ").append(points).append(";\n\n");
 }
 
 # The primary composites as two constants: `_COMPOSITION`, a trie whose
@@ -122,12 +128,13 @@ _composition(out: StringBuilder, compositions: (uint, uint, uint)[]) {
             units.append(i + 2 == list.count ? list[i] | _LAST : list[i]);
         }
     }
-    out.append("## Canonical compositions by first code point: 1 plus where its\n");
-    out.append("## (second, composite) pairs start in `_COMPOSITION_PAIRS`, or 0.\n");
-    out.append("export const _COMPOSITION = ").append(_trie(values, "uint")).append(";\n\n");
+    var (keys, points) = _pointers(values, units);
+    out.append("## Canonical compositions by first code point: 1 plus the byte its\n");
+    out.append("## (second, composite) pairs start at in `_COMPOSITION_PAIRS`, or 0.\n");
+    out.append("export const _COMPOSITION = ").append(keys).append(";\n\n");
     out.append("## The composition pairs of each first code point; its last second is\n");
     out.append("## marked (bit 18).\n");
-    out.append("export const _COMPOSITION_PAIRS = ").append(_literal(units)).append(";\n\n");
+    out.append("export const _COMPOSITION_PAIRS: StringConstant = ").append(points).append(";\n\n");
 }
 
 main(): int {

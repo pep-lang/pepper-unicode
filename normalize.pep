@@ -402,13 +402,14 @@ _composite(first: uint, second: uint): uint {
     # The pairs of `first`: (second, composite), its last second marked.
     var at = start - 1;
     while (true) {
-        var unit = _unit(generated._COMPOSITION_PAIRS, at);
+        var (unit, next) = _unit(generated._COMPOSITION_PAIRS, at);
+        var (composite, after) = _unit(generated._COMPOSITION_PAIRS, next);
         if ((unit & _CODE_POINT) == second) {
-            return _unit(generated._COMPOSITION_PAIRS, at + 1);
+            return composite;
         }
         if ((unit & _LAST) != 0) {
             return 0;
         }
-        at = at + 2;
+        at = after;
     }
 }
