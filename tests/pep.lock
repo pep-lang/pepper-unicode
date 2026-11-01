@@ -5,6 +5,6 @@ version = 1
 [[package]]
 name = "trie"
 source = "github:pep-lang/pepper-trie"
-version = "0.1.0"
-commit = "f3b1452c26eb6eac127175eff6b1d262a0e2f9cb"
-sha256 = "8a50c9e23fa4a90ea5aeef9f964bf792384acc9d6e393e9c391df7d3a070dffd"
+version = "0.2.0"
+commit = "d304ed73f299b7f9577cc933a23acff5499bcdf4"
+sha256 = "d87b3622319ccd13ab54ca003775994dd32ba4125621e71d76f5fff05def0c5a"

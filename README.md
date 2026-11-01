@@ -108,8 +108,7 @@ that never reads it:
   (second, composite) pairs. Hangul syllables decompose and compose by
   arithmetic.
 
-The data takes 7 bits a byte, since stable Pepper keeps only bytes up to
-0x7F in a string constant (pep-lang/pepper#298, #5).
+A mapped code point takes 2 bytes below U+4000 and 3 above.
 
 To move to a new Unicode version, replace the files in `ucd/` with that
 version's (UnicodeData.txt, DerivedNormalizationProps.txt, CaseFolding.txt,
@@ -119,15 +118,15 @@ emoji/emoji-data.txt and extracted/DerivedGeneralCategory.txt, flat), set
 `UNICODE_VERSION` in `lookup.pep`, and copy its NormalizationTest.txt,
 GraphemeBreakTest.txt and WordBreakTest.txt into `tests/fixtures/`.
 
-The data is 116 KB. A program carries only the tables it reads, since
+The data is 107 KB. A program carries only the tables it reads, since
 unused constants are dropped (pep-lang/pepper#271). At `-O` on Windows,
-Pepper 0.11.1, against a hello world of 170 KB:
+Pepper 0.12.0, against a hello world of 167 KB:
 
 | hello world that calls | size | larger by |
 | --- | --- | --- |
-| `unicode.normalize` (all four forms) | 271 KB | 101 KB |
-| `unicode.nfc` only | 245 KB | 75 KB |
-| `case_fold`, `display_width`, `graphemes` and `words` | 252 KB | 82 KB |
+| `unicode.normalize` (all four forms) | 257 KB | 90 KB |
+| `unicode.nfc` only | 233 KB | 66 KB |
+| `case_fold`, `display_width`, `graphemes` and `words` | 243 KB | 76 KB |
 
 A project's first build of a program that uses the package also compiles
 and runs the build script, which takes about 30 s, most of it compiling

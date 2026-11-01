@@ -11,14 +11,17 @@ export const UNICODE_VERSION = "16.0.0";
 const _LAST: uint = 0x40000;
 const _CODE_POINT: uint = 0x3FFFF;
 
-# Unit `index` of mapping data: three bytes, 7 bits each, low first (see
-# `_literal` in build.pep).
-# shortcut: 7 bits a byte until a stable Pepper has pep-lang/pepper#298;
-# then 8, with `_literal` (#5).
-_unit(data: StringConstant, index: ulong): uint {
-    __ptr<char> bytes = data.c_str();
-    var at = index * 3;
-    return (bytes[at] as uint) | ((bytes[at + 1] as uint) << 7) | ((bytes[at + 2] as uint) << 14);
+# The unit of mapping data at byte `at` (a code point, with `_LAST`), and
+# the byte after it: 2 bytes below U+4000, 3 above (see `_pack` in
+# build.pep).
+_unit(data: StringConstant, at: ulong): (uint, ulong) {
+    var bytes = unsafe_cast<__ptr<u8>>(data.c_str());
+    var second = bytes[at + 1] as uint;
+    var unit = (bytes[at] as uint) | ((second & 0x3F) << 8) | ((second & 0x40) << 12);
+    if ((second & 0x80) == 0) {
+        return (unit, at + 2);
+    }
+    return (unit | ((bytes[at + 2] as uint) << 14), at + 3);
 }
 
 # A mapping: a trie whose value for each code point is 1 plus where its
@@ -42,12 +45,12 @@ struct _Mapping {
         }
         var at = start - 1;
         while (true) {
-            var unit = _unit(points, at);
+            var (unit, next) = _unit(points, at);
             out.append(unit & _CODE_POINT);
             if ((unit & _LAST) != 0) {
                 return true;
             }
-            at = at + 1;
+            at = next;
         }
     }
 }
